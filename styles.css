@@ -1,0 +1,16 @@
+.selectize-input {
+	    padding: 6px 30px 6px 12px;
+}
+
+.sidebar {
+	position: fixed;
+	width: inherit;
+}
+
+.mainpanel {
+	padding-left: 3%;
+}
+
+@media print {
+  .page_break_before {page-break-before: always;}
+}
