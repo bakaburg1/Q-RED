@@ -15,6 +15,8 @@ FEATURES:
   - Allows you to sign comments and problems about the reports and if a non-conformity has been reported;
   - Allow you to have an overview of problematic situations;
   - It is highly customizable, allowing three different kinds of comments and completely translatable.
+  
+Check the wiki https://github.com/bakaburg1/Q-RED/wiki to learn how to use it!
 
 **Italiano**
 
@@ -30,3 +32,5 @@ FUNZIONALITA'
   - Permette di associare 3 tipi di appunti ad ogni report, per esempio note e problemi dei report e se sono presenti non conformità;
   - Permette di avere una visione di insieme su situazioni problematiche;
   - È altamente customizzabile, permettendo di modificare i 3 tipi di appunti ed in generale qualunque altra etichetta della app. Utile per la traduzione in altre lingue.
+
+Vai su https://github.com/bakaburg1/Q-RED/wiki per imparare ad usare l'app!
