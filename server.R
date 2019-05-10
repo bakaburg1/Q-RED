@@ -7,15 +7,13 @@
 #    http://shiny.rstudio.com/
 #
 
-source('setup.R')
-
 refvars <<- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% spread(Var, Label) %>% as.list
 load.data()
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
-	Sys.setlocale("LC_TIME", "it_IT")
+	#Sys.setlocale("LC_TIME", "it_IT")
 
 	Data <- Data %>%
 		group_by(Reparto, Indagine) %>%
