@@ -9,8 +9,6 @@
 
 library(shiny)
 
-refvars <<- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% spread(Var, Label) %>% as.list
-
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 	includeCSS("styles.css"),

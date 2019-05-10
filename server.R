@@ -7,13 +7,13 @@
 #    http://shiny.rstudio.com/
 #
 
-refvars <<- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% spread(Var, Label) %>% as.list
 load.data()
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
 	#Sys.setlocale("LC_TIME", "it_IT")
+
 
 	Data <- Data %>%
 		group_by(Reparto, Indagine) %>%
@@ -211,7 +211,7 @@ shinyServer(function(input, output) {
 				filter(Tipo %in% which) %>%
 				dplyr::select(-Tipo) %>%
 				rename(!!(c('Data', 'Protocollo', 'Appunti') %>%
-						set_names(refvars[c('note.table.data', 'note.table.id', 'note.table.note_type')]))
+						set_names(refvars[c('note.table.date', 'note.table.id', 'note.table.note_type')]))
 				)
 		})
 	}

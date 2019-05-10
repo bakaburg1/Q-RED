@@ -19,6 +19,8 @@ pkg.require(c('magrittr', 'tidyverse', 'lubridate', 'glue', 'broom', 'knitr', 'r
 big.mark.opt <- ' '
 mapvalues <- plyr::mapvalues
 
+refvars <<- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% spread(Var, Label) %>% as.list
+
 plots.theme = theme_minimal() +
 	theme(
 		axis.text = element_text(size = 12, colour = 'dimgray'),
