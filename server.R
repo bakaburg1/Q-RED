@@ -7,13 +7,23 @@
 #    http://shiny.rstudio.com/
 #
 
-load.data()
-
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
 	#Sys.setlocale("LC_TIME", "it_IT")
 
+	output$UI.report.sel.text <- renderUI({helpText(refvars$report.sel.text)})
+	output$UI.daterange.sel.text <- renderUI({helpText(refvars$daterange.sel.text)})
+	output$Print.report <- renderUI({actionButton('printReport', refvars$print, onClick = "window.print()")})
+	output$UI.report.prod.title <- renderUI({h4(refvars$report.prod.title)})
+	output$UI.report.notes.title <- renderUI({h4(refvars$report.notes.title, class = 'page_break_before')})
+	output$UI.report.notes.none <- renderUI({p(refvars$report.notes.none)})
+	output$UI.report.notes.have.notes <- renderText({refvars$report.notes.have.notes})
+	output$UI.notes <- renderUI({h5(refvars$notes)})
+	output$UI.problems <- renderUI({h5(refvars$problems)})
+	output$UI.non.compliance <- renderUI({h5(refvars$non.compliance)})
+
+	Data <- load.data()
 
 	Data <- Data %>%
 		group_by(Reparto, Indagine) %>%
@@ -34,8 +44,8 @@ shinyServer(function(input, output) {
 		selectInput('Reparto_corrente', NULL, lista_reparti, selected = if (!isTruthy(input$Reparto_corrente)) lista_reparti[1] else input$Reparto_corrente)
 	})
 
-	output$Slider_data.range <- renderUI({
-		print('output$Slider_data.range')
+	output$Slider_date.range <- renderUI({
+		print('output$Slider_date.range')
 
 		sliderInput("DateRange",
 								label = NULL,
@@ -48,12 +58,12 @@ shinyServer(function(input, output) {
 
 	Data.filtered <- reactive({
 		print('Data.filtered')
-
 		if (loading()) {
+			print(str(Data))
 			Data
 		} else {
 			Data %>%
-				filter(
+				dplyr::filter(
 					Indagine == input$Indagine_corrente,
 					between(Anno, input$DateRange[1], input$DateRange[2]))
 		}
@@ -65,7 +75,7 @@ shinyServer(function(input, output) {
 	Data.Reparto <- reactive({
 		print('Data.Reparto')
 
-		Data.filtered() %>% filter(Reparto == req(input$Reparto_corrente))
+		Data.filtered() %>% dplyr::filter(Reparto == req(input$Reparto_corrente))
 	})
 
 	intervallo_anni <- reactive(input$DateRange[2] - input$DateRange[1] + 1)
@@ -82,8 +92,8 @@ shinyServer(function(input, output) {
 		glue(if (length(Data.Reparto$Diff) == 1) refvars$report.prod.par.single else refvars$report.prod.par.plural,
 				 ' ', refvars$report.prod.par.num, ' ',
 				 if (length(Data.Reparto$Diff) > 2) {
-				 	out <- describe.continuous.var(Data.Reparto$Diff, as.string = F) %>% as.list()
-				 	refvars$report.prod.par.timing
+					out <- describe.continuous.var(Data.Reparto$Diff, as.string = F) %>% as.list()
+					refvars$report.prod.par.timing
 				 }
 				 else '.') %>%
 			HTML
@@ -93,28 +103,28 @@ shinyServer(function(input, output) {
 		print('output$TrendPlot')
 		try({
 			Data %>%
-				filter(Indagine == input$Indagine_corrente) %>%
-				mutate(Ok = is.na(Note) & is.na(Problemi) & is.na(Sforamenti), Ok = replace(Ok, Ok == F, NA)) %>%
-				transmute(Data, Reparto, Indagine, Protocollo, Note, Problemi, Sforamenti, Ok) %>%
-				gather(Tipo, Appunti, -Data, -Protocollo, -Reparto, -Indagine,) %>%
-				mutate(
+				dplyr::filter(Indagine == input$Indagine_corrente) %>%
+				dplyr::mutate(Ok = is.na(Note) & is.na(Problemi) & is.na(Sforamenti), Ok = replace(Ok, Ok == F, NA)) %>%
+				dplyr::transmute(Data, Reparto, Indagine, Protocollo, Note, Problemi, Sforamenti, Ok) %>%
+				tidyr::gather(Tipo, Appunti, -Data, -Protocollo, -Reparto, -Indagine,) %>%
+				dplyr::mutate(
 					Tipo = replace(Tipo, year(Data) < input$DateRange[1] | year(Data) > input$DateRange[2], NA) %>% replace(is.na(Appunti), NA),
 					Tipo = factor(
 						Tipo,
 						levels = c('Ok', 'Note', 'Problemi', 'Sforamenti'),
 						labels = c('Ok', refvars$notes, refvars$problems, refvars$non.compliance)
 					)) %>%
-				filter(!is.na(Tipo)) %>%
-				group_by(Indagine, Reparto, Protocollo) %>%
-				mutate(
-					Label = format(Data, '%m/%y ') %>% str_c('\n', mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
+				dplyr::filter(!is.na(Tipo)) %>%
+				dplyr::group_by(Indagine, Reparto, Protocollo) %>%
+				dplyr::mutate(
+					Label = format(Data, '%m/%y ') %>% str_c('\n', plyr::mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
 					Label = replace(Label, (1:n()) != 1 | Reparto != input$Reparto_corrente, NA)
 				) %>%
-				group_by(Indagine, Reparto) %>%
-				arrange(Protocollo) %>%
-				mutate(Pos = replace(Label, !is.na(Label), rep_len(c(3, -1), sum(!is.na(Label)))) %>% as.numeric()) %>%
-				ungroup() %>%
-				arrange(Data) %>%
+				dplyr::group_by(Indagine, Reparto) %>%
+				dplyr::arrange(Protocollo) %>%
+				dplyr::mutate(Pos = replace(Label, !is.na(Label), rep_len(c(3, -1), sum(!is.na(Label)))) %>% as.numeric()) %>%
+				dplyr::ungroup() %>%
+				dplyr::arrange(Data) %>%
 				ggplot(aes(Data, Reparto %>% factor(levels = sort(Reparto, T) %>% unique()))) +
 				geom_line(aes(size = Reparto == input$Reparto_corrente, alpha = Reparto == input$Reparto_corrente), color = 'steelblue') +
 				geom_point(aes(shape = Tipo, color = Tipo, alpha = Reparto == input$Reparto_corrente), size = 5) +
@@ -144,7 +154,7 @@ shinyServer(function(input, output) {
 		print('output$FreqPlot')
 		try({
 			Data.Reparto() %>%
-				filter(!is.na(Diff)) %>%
+				dplyr::filter(!is.na(Diff)) %>%
 				ggplot(aes(Diff)) +
 				geom_bar(fill = 'steelblue', width = .25) + labs(x = refvars$plot.lab.mothdiff, y = refvars$plot.lab.freq) +
 				coord_cartesian(
@@ -163,7 +173,7 @@ shinyServer(function(input, output) {
 			transmute(Data = format(Data, '%b %Y'), Protocollo, Note, Problemi, Sforamenti) %>%
 			gather(Tipo, Appunti, -Data, -Protocollo) %>%
 			mutate(Tipo = replace(Tipo, Tipo == 'Sforamenti', 'Non conformità') %>% factor(levels = c('Note', 'Problemi', 'Non conformità'))) %>%
-			filter(!is.na(Appunti))
+			dplyr::filter(!is.na(Appunti))
 
 		nrow(df) > 0
 	})
@@ -180,7 +190,7 @@ shinyServer(function(input, output) {
 				levels = c('Note', 'Problemi', 'Sforamenti'),
 				labels = c(refvars$notes, refvars$problems, refvars$non.compliance)
 			)) %>%
-			filter(!is.na(Appunti))
+			dplyr::filter(!is.na(Appunti))
 
 		nrow(df) > 0
 	})
@@ -201,14 +211,14 @@ shinyServer(function(input, output) {
 					levels = c('Note', 'Problemi', 'Sforamenti'),
 					labels = c(refvars$notes, refvars$problems, refvars$non.compliance)
 				)) %>%
-				filter(!is.na(Appunti))}, silent = F)})
+				dplyr::filter(!is.na(Appunti))}, silent = F)})
 	})
 
 	create_tabella_appunti <- function(which) {
 		print('create appunti table')
 		renderTable({
 			req(Data.Appunti()) %>%
-				filter(Tipo %in% which) %>%
+				dplyr::filter(Tipo %in% which) %>%
 				dplyr::select(-Tipo) %>%
 				rename(!!(c('Data', 'Protocollo', 'Appunti') %>%
 						set_names(refvars[c('note.table.date', 'note.table.id', 'note.table.note_type')]))
@@ -231,5 +241,14 @@ shinyServer(function(input, output) {
 	outputOptions(output, "Have_Note", suspendWhenHidden = F)
 	outputOptions(output, "Have_Problemi", suspendWhenHidden = F)
 	outputOptions(output, "Have_Sforamenti", suspendWhenHidden = F)
+
+
+	# observe({
+	#   # If input$quit is unset (NULL) do nothing; if it's anythign else, quit
+	#   # and return input$n
+	#   if (is.null(input$quit)) return()
+
+	#   stopApp(input$n)
+	#   })
 
 })

@@ -1,25 +1,9 @@
-#source('~/Dropbox/R_scripts/regression_helpers.r')
-
-pkg.require <- function(pkgs, load = T){
-	installed <- utils::installed.packages()
-
-	not.installed <- c()
-
-	for (pkg in pkgs) {
-		if (!(pkg %in% installed)) not.installed <- c(not.installed, pkg)
-	}
-
-	if (length(not.installed) > 0) utils::install.packages(not.installed)
-
-	if (load) for (pkg in pkgs) library(pkg, character.only = TRUE)
-}
 pkg.require(c('plyr'), load = F)
 pkg.require(c('magrittr', 'tidyverse', 'lubridate', 'glue', 'broom', 'knitr', 'rmarkdown', 'readxl', 'scales', 'Hmisc', 'shiny'))
 
 big.mark.opt <- ' '
 mapvalues <- plyr::mapvalues
-
-refvars <<- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% spread(Var, Label) %>% as.list
+refvars <- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% mutate_all(str_squish) %>% spread(Var, Label) %>% as.list
 
 plots.theme = theme_minimal() +
 	theme(
@@ -154,7 +138,9 @@ describe.continuous.var <- function(var, as.string = T, CIs = F, sep.ext = ', ',
 load.data <- function() {
 	if ('Data' %in% ls()) rm(Data)
 
-	Data <<- tryCatch(read_excel("Report_data.xlsx"), error = function(e) file.choose()) %>%
+	#refvars <- read_excel('Labels.xlsx') %>% dplyr::select(1:2) %>% set_colnames(c('Var', 'Label')) %>% mutate_all(str_squish) %>% spread(Var, Label) %>% as.list
+
+	tryCatch(read_excel("Report_data.xlsx"), error = function(e) file.choose()) %>%
 		rename(!!c(
 			Anno = refvars$year,
 			Mese = refvars$month,

@@ -16,7 +16,7 @@ FEATURES:
   - Allow you to have an overview of problematic situations;
   - It is highly customizable, allowing three different kinds of comments and completely translatable.
   
-Check the wiki https://github.com/bakaburg1/Q-RED/wiki to learn how to use it!
+Check the wiki https://github.com/bakaburg1/Q-RED/wiki about how to set the app up before using it!
 
 **Italiano**
 
@@ -33,4 +33,4 @@ FUNZIONALITA'
   - Permette di avere una visione di insieme su situazioni problematiche;
   - È altamente customizzabile, permettendo di modificare i 3 tipi di appunti ed in generale qualunque altra etichetta della app. Utile per la traduzione in altre lingue.
 
-Vai su https://github.com/bakaburg1/Q-RED/wiki per imparare ad usare l'app!
+Vai su https://github.com/bakaburg1/Q-RED/wiki per leggere come configurare l'app prima di usarla!

@@ -9,22 +9,30 @@
 
 library(shiny)
 
+
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-	includeCSS("styles.css"),
+	# includeCSS("styles.css"),
+	# tags$script(type = "text/javascript", "
+	# 	$(function() { // Run when DOM ready
+	# 		$(window).bind('beforeunload', function(e) {
+	# 			Shiny.onInputChange('quit', true); // sets input$quit to true
+	# 			});
+	# 			});
+	# 			")
 
 	titlePanel(refvars$app.title),
 
 	sidebarLayout(
 		sidebarPanel(
 			class = 'sidebar d-print-none hidden-print',
-			helpText(refvars$report.sel.text),
+			uiOutput('UI.report.sel.text'),
 			uiOutput('Select_indagini'),
 			br(),
-			helpText(refvars$daterage.sel.text),
-			uiOutput('Slider_data.range'),
+			uiOutput('UI.daterange.sel.text'),
+			uiOutput('Slider_date.range'),
 			uiOutput('Select_reparti', class = 'fixed-top'),
-			actionButton('makeReport', refvars$print, onClick = "window.print()"),
+			uiOutput('Print.report'),
 			width = 3
 		),
 
@@ -35,26 +43,26 @@ shinyUI(fluidPage(
 			plotOutput('TrendPlot'),
 			br(),
 			br(),
-			h4(refvars$report.prod.title),
+			uiOutput('UI.report.prod.title'),
 			uiOutput('Produzione_report', container = p),
 			conditionalPanel('output.Is_plot_freq == true', plotOutput('FreqPlot')),
 			br(),
-			h4(refvars$report.notes.title, class = 'page_break_before'),
+			uiOutput('UI.report.notes.title'),
 			conditionalPanel(
 				'output.Is_Appunti == false',
-				p(refvars$report.notes.none)
+				uiOutput('UI.report.notes.none')
 			),
 			conditionalPanel(
 				'output.Is_Appunti == true',
 				tagList(
 					p(
-						refvars$report.notes.have.notes, ' ', textOutput('Appunti_report', container = span)
+						textOutput('UI.report.notes.have.notes', container = span), ' ', textOutput('Appunti_report', container = span)
 						),
 					uiOutput('Select_appunti'),
 					conditionalPanel(
 						'output.Have_Note == true',
 						tagList(
-							h5(refvars$notes),
+							uiOutput('UI.notes'),
 							uiOutput('Tabella_Note'),
 							br()
 						)
@@ -62,7 +70,7 @@ shinyUI(fluidPage(
 					conditionalPanel(
 						'output.Have_Problemi == true',
 						tagList(
-							h5(refvars$problems),
+							uiOutput('UI.problems'),
 							uiOutput('Tabella_Problemi'),
 							br()
 						)
@@ -70,7 +78,7 @@ shinyUI(fluidPage(
 					conditionalPanel(
 						'output.Have_Sforamenti == true',
 						tagList(
-							h5(refvars$non.compliance),
+							uiOutput('UI.non.compliance'),
 							uiOutput('Tabella_Sforamenti'),
 							br()
 						)
