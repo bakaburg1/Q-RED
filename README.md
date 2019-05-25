@@ -1,5 +1,5 @@
 # Q-RED
-## Quick Reports of Environmental Data - A web tool to manage and monitor hospital-based environmental reports.
+## Quick reports manager tool - A web tool to manage and monitor hospital-based environmental reports.
 
 **English**
 
