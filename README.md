@@ -1,5 +1,5 @@
 # Q-RED
-## Quick Reporting Evaluation Dashboard - A tool to manage and monitor a reporting system.
+## Quick Report Evaluation Dashboard - A tool to manage and monitor a reporting system.
 
 **English**
 
