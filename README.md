@@ -15,6 +15,7 @@ FEATURES:
   - It is highly customizable, allowing three different kinds of comments and completely translatable.
   
 Check the wiki https://github.com/bakaburg1/Q-RED/wiki about how to set the app up before using it!
+Subscribe to https://groups.google.com/d/forum/qred_app for news and updates!
 
 **Italiano**
 
@@ -32,3 +33,4 @@ FUNZIONALITA'
   - È altamente customizzabile, permettendo di modificare i 3 tipi di appunti ed in generale qualunque altra etichetta della app. Utile per la traduzione in altre lingue.
 
 Vai su https://github.com/bakaburg1/Q-RED/wiki per leggere come configurare l'app prima di usarla!
+Iscriviti su https://groups.google.com/d/forum/qred_app per novità e aggiornamenti!
