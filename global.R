@@ -144,6 +144,7 @@ load.data <- function() {
 		rename(!!c(
 			Anno = refvars$year,
 			Mese = refvars$month,
+			Giorno = refvars$day,
 			Indagine = refvars$report,
 			Reparto = refvars$context,
 			Note = refvars$notes,
@@ -151,8 +152,9 @@ load.data <- function() {
 			Sforamenti = refvars$non.compliance,
 			Protocollo = refvars$id
 		)) %>%
+		dplyr::select(-Giorno) %>%
 		mutate(
-			Data = ymd(paste(Anno, Mese, '1', sep = '-'))
+			Data = ymd(paste(Anno, Mese, if (exists('Giorno')) replace(Giorno, is.na(Giorno), 1) else '1', sep = '-'))
 		)
 }
 

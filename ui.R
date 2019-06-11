@@ -12,7 +12,7 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-	# includeCSS("styles.css"),
+	includeCSS("styles.css"),
 	# tags$script(type = "text/javascript", "
 	# 	$(function() { // Run when DOM ready
 	# 		$(window).bind('beforeunload', function(e) {
@@ -31,6 +31,7 @@ shinyUI(fluidPage(
 			br(),
 			uiOutput('UI.daterange.sel.text'),
 			uiOutput('Slider_date.range'),
+			uiOutput('UI.context.sel.text'),
 			uiOutput('Select_reparti', class = 'fixed-top'),
 			uiOutput('Print.report'),
 			width = 3

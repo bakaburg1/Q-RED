@@ -14,6 +14,7 @@ shinyServer(function(input, output) {
 
 	output$UI.report.sel.text <- renderUI({helpText(refvars$report.sel.text)})
 	output$UI.daterange.sel.text <- renderUI({helpText(refvars$daterange.sel.text)})
+	output$UI.context.sel.text <- renderUI({helpText(refvars$context.sel.text)})
 	output$Print.report <- renderUI({actionButton('printReport', refvars$print, onClick = "window.print()")})
 	output$UI.report.prod.title <- renderUI({h4(refvars$report.prod.title)})
 	output$UI.report.notes.title <- renderUI({h4(refvars$report.notes.title, class = 'page_break_before')})
@@ -24,6 +25,11 @@ shinyServer(function(input, output) {
 	output$UI.non.compliance <- renderUI({h5(refvars$non.compliance)})
 
 	Data <- load.data()
+
+	data.has.days <- !is.null(Data$Giorno)
+
+	print('data.has.days')
+	print(data.has.days)
 
 	Data <- Data %>%
 		group_by(Reparto, Indagine) %>%
@@ -51,7 +57,9 @@ shinyServer(function(input, output) {
 								label = NULL,
 								step = 1,
 								sep = '',
-								min = min(Data$Anno), max = max(Data$Anno), value = c(max(min(Data$Anno), max(Data$Anno) - 5), max(Data$Anno)))
+								min = min(Data$Anno),
+								max = max(Data$Anno),
+								value = c(max(min(Data$Anno), max(Data$Anno) - 5), max(Data$Anno)))
 	})
 
 	loading <- reactive(if (is.null(input$DateRange)) T else F)
@@ -117,20 +125,24 @@ shinyServer(function(input, output) {
 				dplyr::filter(!is.na(Tipo)) %>%
 				dplyr::group_by(Indagine, Reparto, Protocollo) %>%
 				dplyr::mutate(
-					Label = format(Data, '%m/%y ') %>% str_c('\n', plyr::mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
+					Label = format(Data, if (data.has.days) '%d/%m/%y' else '%m/%y') %>% str_c('\n', plyr::mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
 					Label = replace(Label, (1:n()) != 1 | Reparto != input$Reparto_corrente, NA)
 				) %>%
 				dplyr::group_by(Indagine, Reparto) %>%
 				dplyr::arrange(Protocollo) %>%
 				dplyr::mutate(Pos = replace(Label, !is.na(Label), rep_len(c(3, -1), sum(!is.na(Label)))) %>% as.numeric()) %>%
 				dplyr::ungroup() %>%
+				dplyr::mutate(
+					Current = Reparto == input$Reparto_corrente,
+					Reparto = case_when(Current ~ str_wrap(Reparto, 60), T ~ str_trunc(Reparto, 60))
+					) %>%
 				dplyr::arrange(Data) %>%
 				ggplot(aes(Data, Reparto %>% factor(levels = sort(Reparto, T) %>% unique()))) +
-				geom_line(aes(size = Reparto == input$Reparto_corrente, alpha = Reparto == input$Reparto_corrente), color = 'steelblue') +
-				geom_point(aes(shape = Tipo, color = Tipo, alpha = Reparto == input$Reparto_corrente), size = 5) +
-				geom_label(aes(label = Label, vjust = Pos * .5), size = 4) +
+				geom_line(aes(size = Current, alpha = Current), color = 'steelblue') +
+				geom_point(aes(shape = Tipo, color = Tipo, alpha = Current), size = 5) +
+				geom_label(aes(label = Label, vjust = Pos * .5), size = if (data.has.days) 3 else 4) +
 				guides(shape = 'none', size = 'none', alpha = 'none') +
-				coord_cartesian(xlim = c(dmy(paste0('1/1/', input$DateRange[1])), dmy(paste0('1/1/', input$DateRange[2])))) +
+				coord_cartesian(xlim = c(dmy(paste0('1/1/', input$DateRange[1])), dmy(paste0('31/12/', input$DateRange[2])))) +
 				scale_y_discrete(expand = expand_scale(add = 1.7)) +
 				scale_x_date(date_breaks = if (intervallo_anni() > 3) '6 months' else if (intervallo_anni() == 4) '2 months' else '1 month', date_labels = '%b %y') +
 				scale_color_manual(name = NULL, values = c('limegreen', 'darkturquoise', 'orange', 'red') %>% set_names(c('Ok', refvars$notes, refvars$problems, refvars$non.compliance))) +
