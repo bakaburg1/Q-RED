@@ -26,6 +26,11 @@ shinyServer(function(input, output) {
 
 	Data <- load.data()
 
+	data.has.days <- !is.null(Data$Giorno)
+
+	print('data.has.days')
+	print(data.has.days)
+
 	Data <- Data %>%
 		group_by(Reparto, Indagine) %>%
 		mutate(Diff = c(NA, time_length(diff(Data), unit = 'months')) %>% round) %>%
@@ -120,7 +125,7 @@ shinyServer(function(input, output) {
 				dplyr::filter(!is.na(Tipo)) %>%
 				dplyr::group_by(Indagine, Reparto, Protocollo) %>%
 				dplyr::mutate(
-					Label = format(Data, '%m/%y ') %>% str_c('\n', plyr::mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
+					Label = format(Data, if (data.has.days) '%d/%m/%y' else '%m/%y') %>% str_c('\n', plyr::mapvalues(unique(Tipo), c('Ok', refvars$notes, refvars$problems, refvars$non.compliance), c('Ok', refvars$notes.tag, refvars$problems.tag, refvars$non.compliance.tag), warn_missing = F) %>% paste(collapse = '-')),
 					Label = replace(Label, (1:n()) != 1 | Reparto != input$Reparto_corrente, NA)
 				) %>%
 				dplyr::group_by(Indagine, Reparto) %>%
@@ -135,7 +140,7 @@ shinyServer(function(input, output) {
 				ggplot(aes(Data, Reparto %>% factor(levels = sort(Reparto, T) %>% unique()))) +
 				geom_line(aes(size = Current, alpha = Current), color = 'steelblue') +
 				geom_point(aes(shape = Tipo, color = Tipo, alpha = Current), size = 5) +
-				geom_label(aes(label = Label, vjust = Pos * .5), size = 4) +
+				geom_label(aes(label = Label, vjust = Pos * .5), size = if (data.has.days) 3 else 4) +
 				guides(shape = 'none', size = 'none', alpha = 'none') +
 				coord_cartesian(xlim = c(dmy(paste0('1/1/', input$DateRange[1])), dmy(paste0('31/12/', input$DateRange[2])))) +
 				scale_y_discrete(expand = expand_scale(add = 1.7)) +
